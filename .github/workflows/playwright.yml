@@ -25,3 +25,7 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v6
+      env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
