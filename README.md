@@ -1,16 +1,63 @@
-# React + Vite
+# Task Manager - Playwright Test Automation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Playwright](https://img.shields.io/badge/Playwright-1.40.0-2eada8.svg)](https://playwright.dev)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933.svg)](https://nodejs.org)
+[![GitHub Actions](https://github.com/Ledloy/qa-auto-engineer-javascript-project-90/actions/workflows/playwright.yml/badge.svg)](https://github.com/Ledloy/qa-auto-engineer-javascript-project-90/actions)
 
-Currently, two official plugins are available:
+## 🎯 Цель проекта
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Автоматизированное тестирование приложения управления задачами, разработанного с использованием **react-admin**, с помощью инструмента **Playwright**.
 
-## React Compiler
+## 📋 Описание
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Task Manager** — система управления задачами (аналог Redmine). Приложение позволяет:
+- 📝 Создавать, редактировать, удалять и перемещать задачи
+- 👥 Управлять пользователями (для администраторов)
+- 🏷️ Создавать и редактировать метки задач
+- 📊 Настраивать статусы задач для Kanban-доски
 
-## Expanding the ESLint configuration
+## 🛠️ Технологический стек
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Технология | Назначение |
+|-----------|-----------|
+| Playwright | Фреймворк для автоматизации тестирования |
+| JavaScript (ES6+) | Язык написания тестов |
+| Page Object Model | Паттерн организации кода |
+| GitHub Actions | CI/CD для запуска тестов |
+
+## 🚀 Установка и запуск
+
+## Требования
+Node.js 20.x или выше
+npm 10.x или выше
+
+## Клонировать проект
+git clone <URL-вашего-репозитория>
+cd <имя-проекта>
+
+## Установить зависимости
+
+```bash
+npm ci
+```
+
+## Установить браузеры Playwright
+```bash
+npx playwright install --with-deps
+```
+
+## Запустить все тесты
+```bash
+npx playwright test
+```
+
+## Запустить с браузером (для отладки)
+```bash
+npx playwright test --headed
+```
+
+## Сгенерировать отчёт
+```bash
+npx playwright test && npx playwright show-report
+```
+
