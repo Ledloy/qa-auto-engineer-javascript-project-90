@@ -3,6 +3,8 @@
 [![Playwright](https://img.shields.io/badge/Playwright-1.40.0-2eada8.svg)](https://playwright.dev)
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933.svg)](https://nodejs.org)
 [![GitHub Actions](https://github.com/Ledloy/qa-auto-engineer-javascript-project-90/actions/workflows/playwright.yml/badge.svg)](https://github.com/Ledloy/qa-auto-engineer-javascript-project-90/actions)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ledloy_qa-auto-engineer-javascript-project-90&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ledloy_qa-auto-engineer-javascript-project-90)
+
 
 ## 🎯 Цель проекта
 
