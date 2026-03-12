@@ -1,29 +1,23 @@
 export class TasksPage {
   constructor(page) {
     this.page = page;
-    
-
     this.tasksMenuLink = page.getByRole('menuitem', { name: 'Tasks' });
-    
-
     this.createButton = page.getByRole('link', { name: 'Create' });
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.deleteButton = page.getByRole('button', { name: 'Delete' });
-  
     this.assigneeSelect = page.getByRole('combobox', { name: 'Assignee' });
     this.titleInput = page.getByRole('textbox', { name: 'Title' });
     this.contentInput = page.getByRole('textbox', { name: 'Content' });
     this.statusSelect = page.getByRole('combobox', { name: 'Status' });
     this.labelSelect = page.getByRole('combobox', { name: 'Label' });
-
     this.kanbanColumns = page.getByRole('heading');
     this.taskCards = page.getByRole('link', { name: 'Edit' });
-    
     this.filterAssignee = page.getByRole('combobox', { name: 'Assignee' }).first();
     this.filterStatus = page.getByRole('combobox', { name: 'Status' }).first();
- 
     this.successMessage = page.getByText('Element created').or(page.getByText('Element updated'));
     this.deleteMessage = page.getByText('Element deleted');
+    this.kanbanBoard = page.getByRole('heading', { name: 'Draft' }).first();
+    this.logoutButton = page.getByRole('button', { name: 'Profile' });
   }
 
   async goto() {
@@ -40,9 +34,7 @@ export class TasksPage {
     await this.titleInput.waitFor({ state: 'visible', timeout: 10000 });
   }
 
-
   async fillTaskForm({ title, content, assignee, status, label }) {
-   
     if (assignee) {
       await this.assigneeSelect.click();
       await this.page.getByRole('option', { name: assignee }).click();
@@ -70,13 +62,12 @@ export class TasksPage {
     await this.saveButton.click();
   }
 
-async editTask(taskIndex = 0) {
-  const editLinks = this.page.getByRole('link', { name: 'Edit' });
-  await editLinks.nth(taskIndex).click();
-  
-  await this.titleInput.waitFor({ state: 'visible', timeout: 10000 });
-}
-
+  async editTask(taskIndex = 0) {
+    const editLinks = this.page.getByRole('link', { name: 'Edit' });
+    await editLinks.nth(taskIndex).click();
+    
+    await this.titleInput.waitFor({ state: 'visible', timeout: 10000 });
+  }
 
   async deleteTask(taskIndex = 0) {
     await this.editTask(taskIndex);
@@ -91,9 +82,7 @@ async editTask(taskIndex = 0) {
     await this.page.getByRole('option', { name: targetColumn }).click();
     await this.page.waitForTimeout(300);
     
-
     await this.save();
-
     await this.page.waitForTimeout(1000);
   }
   
@@ -127,5 +116,9 @@ async editTask(taskIndex = 0) {
 
   async waitForSuccessMessage() {
     await this.successMessage.first().waitFor({ state: 'visible', timeout: 10000 });
+  }
+
+  async waitForDeleteMessage() {
+    await this.deleteMessage.first().waitFor({ state: 'visible', timeout: 10000 });
   }
 }

@@ -1,149 +1,127 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
-import { TasksPage } from '../pages/TasksPage.js';
+import { StatusesPage } from '../pages/StatusesPage.js';
 
-test.describe('Tasks Management', () => {
-  let loginPage, tasksPage;
+test.describe('Statuses Management', () => {
+  let loginPage, statusesPage;
 
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
-    tasksPage = new TasksPage(page);
+    statusesPage = new StatusesPage(page);
     
     await loginPage.goto();
     await loginPage.loginAsDefault();
     await expect(loginPage.page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 10000 });
     
- 
-    await tasksPage.openTasksPage();
+    await statusesPage.openStatusesPage();
   });
 
-  
-  test('should display create task form correctly', async ({ page }) => {
-    await tasksPage.clickCreate();
+  test('should display statuses page correctly', async ({ page }) => {
+    await expect(statusesPage.statusesTable).toBeVisible();
     
-    await expect(tasksPage.titleInput).toBeVisible();
-    await expect(tasksPage.contentInput).toBeVisible();
-    await expect(tasksPage.assigneeSelect).toBeVisible();
-    await expect(tasksPage.statusSelect).toBeVisible();
-    await expect(tasksPage.saveButton).toBeVisible();
+    const count = await statusesPage.getStatusesCount();
+    expect(count).toBeGreaterThan(0);
   });
 
-  test('should create a new task successfully', async ({ page }) => {
-    const testData = {
-      title: `Task ${Date.now()}`,
-      content: 'Test task description'
-    };
+  test('should display create status form correctly', async ({ page }) => {
+    await statusesPage.clickCreate();
     
-    await tasksPage.clickCreate();
-    await tasksPage.fillTaskForm(testData);
-    await tasksPage.save();
-    
-    await tasksPage.waitForSuccessMessage();
-    await expect(page.locator(`text=${testData.title}`)).toBeVisible();
+    await expect(statusesPage.nameInput).toBeVisible();
+    await expect(statusesPage.slugInput).toBeVisible();
+    await expect(statusesPage.saveButton).toBeVisible();
   });
 
-  
-  test('should display kanban board correctly', async ({ page }) => {
-    await expect(tasksPage.kanbanBoard.or(tasksPage.taskCards.first())).toBeVisible();
+  test('should create a new status successfully', async ({ page }) => {
+    const statusName = `Status ${Date.now()}`;
+    const statusSlug = `status_${Date.now()}`;
     
-    const count = await tasksPage.getTasksCount();
-    expect(count).toBeGreaterThanOrEqual(0);
+    await statusesPage.clickCreate();
+    await statusesPage.fillStatusForm({
+      name: statusName,
+      slug: statusSlug
+    });
+    await statusesPage.save();
+    
+    await statusesPage.waitForSuccessMessage();
+    await expect(page.locator(`text=${statusName}`)).toBeVisible();
   });
 
-  test('should display task columns correctly', async ({ page }) => {
-    const columns = tasksPage.kanbanColumns;
-    await expect(columns.first()).toBeVisible();
-    
-    await expect(page.locator('text=Draft')).toBeVisible();
-    await expect(page.locator('text=To Review')).toBeVisible();
+  test('should display status information correctly', async ({ page }) => {
+    await expect(page.locator('text=Name')).toBeVisible();
+    await expect(page.locator('text=Slug')).toBeVisible();
+    await expect(page.locator('text=Created at')).toBeVisible();
   });
 
-  
   test('should display edit form correctly', async ({ page }) => {
-    const count = await tasksPage.getTasksCount();
+    const count = await statusesPage.getStatusesCount();
     if (count === 0) {
-  
-      await tasksPage.clickCreate();
-      await tasksPage.fillTaskForm({
-        title: 'Test Task',
-        content: 'For editing'
+      await statusesPage.clickCreate();
+      await statusesPage.fillStatusForm({
+        name: 'Test Status',
+        slug: 'test_status'
       });
-      await tasksPage.save();
-      await tasksPage.waitForSuccessMessage();
-      await tasksPage.openTasksPage();
+      await statusesPage.save();
+      await statusesPage.waitForSuccessMessage();
+      await statusesPage.openStatusesPage();
     }
     
-    await tasksPage.editTask(0);
+    await statusesPage.editStatus(0);
     
-    await expect(tasksPage.titleInput).toBeVisible();
-    await expect(tasksPage.contentInput).toBeVisible();
-    await expect(tasksPage.saveButton).toBeVisible();
+    await expect(statusesPage.nameInput).toBeVisible();
+    await expect(statusesPage.saveButton).toBeVisible();
   });
 
-  test('should edit task data successfully', async ({ page }) => {
-    const newTitle = `Edited Task ${Date.now()}`;
+  test('should edit status data successfully', async ({ page }) => {
+    const newName = `Edited Status ${Date.now()}`;
     
-    await tasksPage.editTask(0);
+    await statusesPage.editStatus(0);
     
-    await tasksPage.titleInput.clear();
-    await tasksPage.titleInput.fill(newTitle);
-    await tasksPage.save();
+    await statusesPage.nameInput.clear();
+    await statusesPage.nameInput.fill(newName);
+    await statusesPage.save();
     
-    await page.getByText('Element updated').waitFor({ state: 'visible', timeout: 10000 });
-    await expect(page.locator(`text=${newTitle}`)).toBeVisible();
+    await statusesPage.waitForSuccessMessage();
+    await expect(page.locator(`text=${newName}`)).toBeVisible();
   });
 
-  test('should move task between columns', async ({ page }) => {
-    const taskTitle = `Move Task ${Date.now()}`;
+  test('should delete a single status', async ({ page }) => {
+    const initialCount = await statusesPage.getStatusesCount();
+    if (initialCount <= 1) return;
     
-    await tasksPage.clickCreate();
-    await tasksPage.fillTaskForm({
-      title: taskTitle,
-      content: 'For moving'
-    });
-    await tasksPage.save();
-    await tasksPage.waitForSuccessMessage();
+    await statusesPage.deleteStatus(initialCount - 1);
     
-    await tasksPage.moveTaskToColumn(taskTitle, 'To Review');
-  
-    await expect(tasksPage.isTaskInColumn(taskTitle, 'To Review')).toBeTruthy();
-  });
-
-  
-  test('should filter tasks by status', async ({ page }) => {
-
-    await tasksPage.filterByStatus('Draft');
+    await statusesPage.waitForDeleteMessage();
     
-
-    await expect(tasksPage.kanbanBoard.or(tasksPage.taskCards.first())).toBeVisible();
-    
-
-    await tasksPage.clearFilters();
-  });
-
-  test('should filter tasks by assignee', async ({ page }) => {
-  
-    await tasksPage.filterByAssignee('admin');
-    
-  
-    await expect(tasksPage.kanbanBoard.or(tasksPage.taskCards.first())).toBeVisible();
-    
-
-    await tasksPage.clearFilters();
-  });
-
-  
-  test('should delete a single task', async ({ page }) => {
-    const initialCount = await tasksPage.getTasksCount();
-    if (initialCount === 0) return;
-    
-    await tasksPage.deleteTask(0);
-    
-    await tasksPage.waitForDeleteMessage();
-    
-    const finalCount = await tasksPage.getTasksCount();
+    const finalCount = await statusesPage.getStatusesCount();
     expect(finalCount).toBeLessThan(initialCount);
   });
 
+  test('should select all statuses', async ({ page }) => {
+    const initialCount = await statusesPage.getStatusesCount();
+    if (initialCount === 0) return;
+    
+    await statusesPage.selectAllStatuses();
+    
+    const selectedCount = await page.locator('tbody input[type="checkbox"]:checked').count();
+    expect(selectedCount).toBe(initialCount);
+  });
 
+  test('should bulk delete all statuses', async ({ page }) => {
+    const initialCount = await statusesPage.getStatusesCount();
+    if (initialCount === 0) return;
+    
+    await statusesPage.selectAllStatuses();
+    await statusesPage.delete();
+    
+    try {
+      await statusesPage.waitForDeleteMessage();
+    } catch (error) {
+      void error;
+    }
+    
+    await page.waitForTimeout(500);
+    
+    const finalCount = await statusesPage.getStatusesCount();
+    expect(finalCount).toBeLessThan(initialCount);
+  });
 });
