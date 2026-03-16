@@ -1,3 +1,6 @@
+### Hexlet tests and linter status:
+[![Actions Status](https://github.com/Ledloy/qa-auto-engineer-javascript-project-90/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Ledloy/qa-auto-engineer-javascript-project-90/actions)
+
 # Task Manager - Playwright Test Automation
 
 [![Playwright](https://img.shields.io/badge/Playwright-1.40.0-2eada8.svg)](https://playwright.dev)
