@@ -1,5 +1,5 @@
 {
-  "name": "hexlet-code",
+  "name": "@hexlet/code",
   "private": true,
   "version": "0.0.0",
   "type": "module",
