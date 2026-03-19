@@ -34,7 +34,7 @@ test.describe('Users Management', () => {
 
 
   
-  test('should display create user form correctly', async ({ page }) => {
+  test('should display create user form correctly', async () => {
     await usersPage.clickCreate();
     
     await expect(usersPage.firstNameInput).toBeVisible();
@@ -43,7 +43,7 @@ test.describe('Users Management', () => {
     await expect(usersPage.saveButton).toBeVisible();
   });
 
-  test('should create a new user successfully', async ({ page }) => {
+  test('should create a new user successfully', async () => {
     const testData = {
       firstName: 'Test',
       lastName: 'User',
@@ -59,20 +59,20 @@ test.describe('Users Management', () => {
   });
 
   
-  test('should display users list correctly', async ({ page }) => {
+  test('should display users list correctly', async () => {
     await expect(usersPage.userTable).toBeVisible();
     
     const count = await usersPage.getUserCount();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display user information correctly', async ({ page }) => {
+  test('should display user information correctly', async () => {
     await expect(page.locator('text=Email')).toBeVisible();
     await expect(page.locator('text=First name')).toBeVisible();
   });
 
 
-  test('should display edit form correctly', async ({ page }) => {
+  test('should display edit form correctly', async () => {
     await usersPage.editUser(0);
     
     await expect(usersPage.emailInput).toBeVisible();
@@ -80,7 +80,7 @@ test.describe('Users Management', () => {
     await expect(usersPage.saveButton).toBeVisible();
   });
 
-  test('should edit user data successfully', async ({ page }) => {
+  test('should edit user data successfully', async () => {
     const newEmail = `edited${Date.now()}@google.com`;
     
     await usersPage.editUser(0);
@@ -94,7 +94,7 @@ test.describe('Users Management', () => {
   });
 
 
-  test('should validate email on edit', async ({ page }) => {
+  test('should validate email on edit', async () => {
     await usersPage.editUser(0);
     
     await usersPage.emailInput.clear();
@@ -105,7 +105,7 @@ test.describe('Users Management', () => {
   });
 
   
-  test('should delete a single user', async ({ page }) => {
+  test('should delete a single user', async () => {
     const initialCount = await usersPage.getUserCount();
     
     await usersPage.deleteUser(0);
@@ -117,7 +117,7 @@ test.describe('Users Management', () => {
   });
 
   
-  test('should select all users', async ({ page }) => {
+  test('should select all users', async () => {
     const initialCount = await usersPage.getUserCount();
     
     await usersPage.selectAllUsers();
@@ -127,7 +127,7 @@ test.describe('Users Management', () => {
   });
 
 
-  test('should bulk delete all users', async ({ page }) => {
+  test('should bulk delete all users', async () => {
     const initialCount = await usersPage.getUserCount();
     if (initialCount === 0) return;
     

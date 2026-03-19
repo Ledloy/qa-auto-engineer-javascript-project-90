@@ -1,7 +1,5 @@
 import js from '@eslint/js';
 import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
   {
@@ -23,20 +21,8 @@ export default [
         ecmaFeatures: { jsx: true },
       },
     },
-    plugins: {
-      'react-hooks': {
-        rules: reactHooks.rules,
-        configs: reactHooks.configs,
-      },
-      'react-refresh': {
-        rules: reactRefresh.rules,
-        configs: reactRefresh.configs,
-      },
-    },
     rules: {
       ...js.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'no-unused-vars': ['warn', { 
         varsIgnorePattern: '^[A-Z_]',
         argsIgnorePattern: '^_'
@@ -53,12 +39,15 @@ export default [
         describe: 'readonly',
         beforeEach: 'readonly',
         afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
       },
     },
     rules: {
-      'no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^(page|browser|context)',
-        varsIgnorePattern: '^(page|browser|context)'
+      'no-unused-vars': ['error', { 
+        args: 'all',
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^_'
       }],
       'no-undef': 'off',
     },

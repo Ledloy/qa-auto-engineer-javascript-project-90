@@ -27,14 +27,14 @@ test.describe('Labels Management', () => {
     }
   });
   
-  test('should display create label form correctly', async ({ page }) => {
+  test('should display create label form correctly', async () => {
     await labelsPage.clickCreate();
     
     await expect(labelsPage.nameInput).toBeVisible();
     await expect(labelsPage.saveButton).toBeVisible();
   });
 
-  test('should create a new label successfully', async ({ page }) => {
+  test('should create a new label successfully', async () => {
     const testData = {
       name: `Label ${Date.now()}`
     };
@@ -48,26 +48,26 @@ test.describe('Labels Management', () => {
   });
 
   
-  test('should display labels list correctly', async ({ page }) => {
+  test('should display labels list correctly', async () => {
     await expect(labelsPage.labelsTable).toBeVisible();
     
     const count = await labelsPage.getLabelsCount();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display label information correctly', async ({ page }) => {
+  test('should display label information correctly', async () => {
     await expect(page.locator('text=Name')).toBeVisible();
   });
 
   
-  test('should display edit form correctly', async ({ page }) => {
+  test('should display edit form correctly', async () => {
     await labelsPage.editLabel(0);
     
     await expect(labelsPage.nameInput).toBeVisible();
     await expect(labelsPage.saveButton).toBeVisible();
   });
 
-  test('should edit label data successfully', async ({ page }) => {
+  test('should edit label data successfully', async () => {
     const newName = `Edited Label ${Date.now()}`;
     
     await labelsPage.editLabel(0);
@@ -81,7 +81,7 @@ test.describe('Labels Management', () => {
   });
 
   
-  test('should delete a single label', async ({ page }) => {
+  test('should delete a single label', async () => {
     const initialCount = await labelsPage.getLabelsCount();
     
     await labelsPage.deleteLabel(0);
@@ -92,7 +92,7 @@ test.describe('Labels Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  test('should select all labels', async ({ page }) => {
+  test('should select all labels', async () => {
     const initialCount = await labelsPage.getLabelsCount();
     
     await labelsPage.selectAllLabels();
@@ -101,7 +101,7 @@ test.describe('Labels Management', () => {
     expect(selectedCount).toBe(initialCount);
   });
 
-  test('should bulk delete all labels', async ({ page }) => {
+  test('should bulk delete all labels', async () => {
     const initialCount = await labelsPage.getLabelsCount();
     if (initialCount === 0) return;
     

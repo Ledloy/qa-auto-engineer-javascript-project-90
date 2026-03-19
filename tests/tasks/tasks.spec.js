@@ -33,7 +33,7 @@ test.describe('Tasks Management', () => {
   });
 
   
-  test('should display create task form correctly', async ({ page }) => {
+  test('should display create task form correctly', async () => {
     await tasksPage.clickCreate();
     
     await expect(tasksPage.titleInput).toBeVisible();
@@ -42,7 +42,7 @@ test.describe('Tasks Management', () => {
     await expect(tasksPage.saveButton).toBeVisible();
   });
 
-  test('should create a new task successfully', async ({ page }) => {
+  test('should create a new task successfully', async () => {
     const testData = {
       title: `Task ${Date.now()}`,
       content: 'Test task',
@@ -59,7 +59,7 @@ test.describe('Tasks Management', () => {
   });
 
   
-  test('should display edit form correctly', async ({ page }) => {
+  test('should display edit form correctly', async () => {
     const count = await tasksPage.getTasksCount();
     if (count === 0) {
       await tasksPage.clickCreate();
@@ -80,7 +80,7 @@ test.describe('Tasks Management', () => {
     await expect(tasksPage.saveButton).toBeVisible();
   });
 
-  test('should edit task data successfully', async ({ page }) => {
+  test('should edit task data successfully', async () => {
     const newTitle = `Edited ${Date.now()}`;
     
     await tasksPage.editTask(0);
@@ -93,7 +93,7 @@ test.describe('Tasks Management', () => {
   });
 
   
-  test('should filter tasks by status', async ({ page }) => {
+  test('should filter tasks by status', async () => {
     await tasksPage.clickCreate();
     await tasksPage.fillTaskForm({
       title: `Filter Task ${Date.now()}`,
@@ -112,13 +112,13 @@ test.describe('Tasks Management', () => {
   });
 
   
-  test('should filter tasks by assignee', async ({ page }) => {
+  test('should filter tasks by assignee', async () => {
     await tasksPage.filterByAssignee('emily@example.com');
     await expect(page.getByRole('heading', { name: 'Draft' })).toBeVisible();
     await tasksPage.clearFilters();
   });
   
-  test('should delete a single task', async ({ page }) => {
+  test('should delete a single task', async () => {
     const initialCount = await tasksPage.getTasksCount();
     if (initialCount === 0) return;
     
@@ -129,7 +129,7 @@ test.describe('Tasks Management', () => {
   });
 
   
-  test('should move card using dragTo locator', async ({ page }) => {
+  test('should move card using dragTo locator', async () => {
     const taskTitle = `DragTest ${Date.now()}`;
     
 

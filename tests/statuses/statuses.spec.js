@@ -16,14 +16,14 @@ test.describe('Statuses Management', () => {
     await statusesPage.openStatusesPage();
   });
 
-  test('should display statuses page correctly', async ({ page }) => {
+  test('should display statuses page correctly', async () => {
     await expect(statusesPage.statusesTable).toBeVisible();
     
     const count = await statusesPage.getStatusesCount();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display create status form correctly', async ({ page }) => {
+  test('should display create status form correctly', async () => {
     await statusesPage.clickCreate();
     
     await expect(statusesPage.nameInput).toBeVisible();
@@ -31,7 +31,7 @@ test.describe('Statuses Management', () => {
     await expect(statusesPage.saveButton).toBeVisible();
   });
 
-  test('should create a new status successfully', async ({ page }) => {
+  test('should create a new status successfully', async () => {
     const statusName = `Status ${Date.now()}`;
     const statusSlug = `status_${Date.now()}`;
     
@@ -46,13 +46,13 @@ test.describe('Statuses Management', () => {
     await expect(page.locator(`text=${statusName}`)).toBeVisible();
   });
 
-  test('should display status information correctly', async ({ page }) => {
+  test('should display status information correctly', async () => {
     await expect(page.locator('text=Name')).toBeVisible();
     await expect(page.locator('text=Slug')).toBeVisible();
     await expect(page.locator('text=Created at')).toBeVisible();
   });
 
-  test('should display edit form correctly', async ({ page }) => {
+  test('should display edit form correctly', async () => {
     const count = await statusesPage.getStatusesCount();
     if (count === 0) {
       await statusesPage.clickCreate();
@@ -71,7 +71,7 @@ test.describe('Statuses Management', () => {
     await expect(statusesPage.saveButton).toBeVisible();
   });
 
-  test('should edit status data successfully', async ({ page }) => {
+  test('should edit status data successfully', async () => {
     const newName = `Edited Status ${Date.now()}`;
     
     await statusesPage.editStatus(0);
@@ -84,7 +84,7 @@ test.describe('Statuses Management', () => {
     await expect(page.locator(`text=${newName}`)).toBeVisible();
   });
 
-  test('should delete a single status', async ({ page }) => {
+  test('should delete a single status', async () => {
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount <= 1) return;
     
@@ -96,7 +96,7 @@ test.describe('Statuses Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  test('should select all statuses', async ({ page }) => {
+  test('should select all statuses', async () => {
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount === 0) return;
     
@@ -106,7 +106,7 @@ test.describe('Statuses Management', () => {
     expect(selectedCount).toBe(initialCount);
   });
 
-  test('should bulk delete all statuses', async ({ page }) => {
+  test('should bulk delete all statuses', async () => {
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount === 0) return;
     

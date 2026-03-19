@@ -75,7 +75,7 @@ export class TasksPage {
     await this.deleteMessage.first().waitFor({ state: 'visible', timeout: 10000 });
   }
 
-  async moveTaskToColumn(taskTitle, targetColumn) {
+  async moveTaskToColumn(_taskTitle, targetColumn) {
     await this.editTask(0);
     
     await this.statusSelect.click();
