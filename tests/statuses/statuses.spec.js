@@ -16,14 +16,18 @@ test.describe('Statuses Management', () => {
     await statusesPage.openStatusesPage();
   });
 
-  test('should display statuses page correctly', async () => {
+  test('should display statuses page correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     await expect(statusesPage.statusesTable).toBeVisible();
     
     const count = await statusesPage.getStatusesCount();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display create status form correctly', async () => {
+  test('should display create status form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     await statusesPage.clickCreate();
     
     await expect(statusesPage.nameInput).toBeVisible();
@@ -31,7 +35,7 @@ test.describe('Statuses Management', () => {
     await expect(statusesPage.saveButton).toBeVisible();
   });
 
-  test('should create a new status successfully', async () => {
+  test('should create a new status successfully', async ({ page }) => {
     const statusName = `Status ${Date.now()}`;
     const statusSlug = `status_${Date.now()}`;
     
@@ -46,13 +50,17 @@ test.describe('Statuses Management', () => {
     await expect(page.locator(`text=${statusName}`)).toBeVisible();
   });
 
-  test('should display status information correctly', async () => {
+  test('should display status information correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     await expect(page.locator('text=Name')).toBeVisible();
     await expect(page.locator('text=Slug')).toBeVisible();
     await expect(page.locator('text=Created at')).toBeVisible();
   });
 
-  test('should display edit form correctly', async () => {
+  test('should display edit form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     const count = await statusesPage.getStatusesCount();
     if (count === 0) {
       await statusesPage.clickCreate();
@@ -71,7 +79,7 @@ test.describe('Statuses Management', () => {
     await expect(statusesPage.saveButton).toBeVisible();
   });
 
-  test('should edit status data successfully', async () => {
+  test('should edit status data successfully', async ({ page }) => {
     const newName = `Edited Status ${Date.now()}`;
     
     await statusesPage.editStatus(0);
@@ -84,7 +92,9 @@ test.describe('Statuses Management', () => {
     await expect(page.locator(`text=${newName}`)).toBeVisible();
   });
 
-  test('should delete a single status', async () => {
+  test('should delete a single status', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount <= 1) return;
     
@@ -96,7 +106,9 @@ test.describe('Statuses Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  test('should select all statuses', async () => {
+  test('should select all statuses', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount === 0) return;
     
@@ -106,7 +118,9 @@ test.describe('Statuses Management', () => {
     expect(selectedCount).toBe(initialCount);
   });
 
-  test('should bulk delete all statuses', async () => {
+  test('should bulk delete all statuses', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount === 0) return;
     

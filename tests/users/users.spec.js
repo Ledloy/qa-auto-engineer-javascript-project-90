@@ -9,15 +9,12 @@ test.describe('Users Management', () => {
     loginPage = new LoginPage(page);
     usersPage = new UsersPage(page);
     
-
     await loginPage.goto();
     await loginPage.loginAsDefault();
     await expect(loginPage.page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 10000 });
     
- 
     await usersPage.openUsersPage();
     
-   
     const count = await usersPage.getUserCount();
     if (count === 0) {
       await usersPage.clickCreate();
@@ -32,9 +29,9 @@ test.describe('Users Management', () => {
     }
   });
 
-
-  
-  test('should display create user form correctly', async () => {
+  test('should display create user form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     await usersPage.clickCreate();
     
     await expect(usersPage.firstNameInput).toBeVisible();
@@ -43,7 +40,9 @@ test.describe('Users Management', () => {
     await expect(usersPage.saveButton).toBeVisible();
   });
 
-  test('should create a new user successfully', async () => {
+  test('should create a new user successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     const testData = {
       firstName: 'Test',
       lastName: 'User',
@@ -58,21 +57,25 @@ test.describe('Users Management', () => {
     await expect(page.locator(`text=${testData.email}`)).toBeVisible();
   });
 
-  
-  test('should display users list correctly', async () => {
+  test('should display users list correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     await expect(usersPage.userTable).toBeVisible();
     
     const count = await usersPage.getUserCount();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display user information correctly', async () => {
+  test('should display user information correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     await expect(page.locator('text=Email')).toBeVisible();
     await expect(page.locator('text=First name')).toBeVisible();
   });
 
-
-  test('should display edit form correctly', async () => {
+  test('should display edit form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     await usersPage.editUser(0);
     
     await expect(usersPage.emailInput).toBeVisible();
@@ -80,7 +83,9 @@ test.describe('Users Management', () => {
     await expect(usersPage.saveButton).toBeVisible();
   });
 
-  test('should edit user data successfully', async () => {
+  test('should edit user data successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     const newEmail = `edited${Date.now()}@google.com`;
     
     await usersPage.editUser(0);
@@ -93,8 +98,9 @@ test.describe('Users Management', () => {
     await expect(page.locator(`text=${newEmail}`)).toBeVisible();
   });
 
-
-  test('should validate email on edit', async () => {
+  test('should validate email on edit', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     await usersPage.editUser(0);
     
     await usersPage.emailInput.clear();
@@ -104,8 +110,9 @@ test.describe('Users Management', () => {
     await expect(page.getByText('Incorrect email format')).toBeVisible({ timeout: 5000 });
   });
 
-  
-  test('should delete a single user', async () => {
+  test('should delete a single user', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     const initialCount = await usersPage.getUserCount();
     
     await usersPage.deleteUser(0);
@@ -116,8 +123,9 @@ test.describe('Users Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  
-  test('should select all users', async () => {
+  test('should select all users', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     const initialCount = await usersPage.getUserCount();
     
     await usersPage.selectAllUsers();
@@ -126,8 +134,9 @@ test.describe('Users Management', () => {
     expect(selectedCount).toBe(initialCount);
   });
 
-
-  test('should bulk delete all users', async () => {
+  test('should bulk delete all users', async ({ page }) => {
+    await expect(page).toHaveURL(/users/);
+    
     const initialCount = await usersPage.getUserCount();
     if (initialCount === 0) return;
     
@@ -143,7 +152,6 @@ test.describe('Users Management', () => {
       void error;
     }
     
-  
     await page.waitForTimeout(500);
     const finalCount = await usersPage.getUserCount();
     expect(finalCount).toBeLessThan(initialCount);

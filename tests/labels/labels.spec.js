@@ -27,14 +27,18 @@ test.describe('Labels Management', () => {
     }
   });
   
-  test('should display create label form correctly', async () => {
+  test('should display create label form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     await labelsPage.clickCreate();
     
     await expect(labelsPage.nameInput).toBeVisible();
     await expect(labelsPage.saveButton).toBeVisible();
   });
 
-  test('should create a new label successfully', async () => {
+  test('should create a new label successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     const testData = {
       name: `Label ${Date.now()}`
     };
@@ -47,27 +51,33 @@ test.describe('Labels Management', () => {
     await expect(page.locator(`text=${testData.name}`)).toBeVisible();
   });
 
-  
-  test('should display labels list correctly', async () => {
+  test('should display labels list correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     await expect(labelsPage.labelsTable).toBeVisible();
     
     const count = await labelsPage.getLabelsCount();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display label information correctly', async () => {
+  test('should display label information correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     await expect(page.locator('text=Name')).toBeVisible();
   });
 
-  
-  test('should display edit form correctly', async () => {
+  test('should display edit form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     await labelsPage.editLabel(0);
     
     await expect(labelsPage.nameInput).toBeVisible();
     await expect(labelsPage.saveButton).toBeVisible();
   });
 
-  test('should edit label data successfully', async () => {
+  test('should edit label data successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     const newName = `Edited Label ${Date.now()}`;
     
     await labelsPage.editLabel(0);
@@ -80,8 +90,9 @@ test.describe('Labels Management', () => {
     await expect(page.locator(`text=${newName}`)).toBeVisible();
   });
 
-  
-  test('should delete a single label', async () => {
+  test('should delete a single label', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     const initialCount = await labelsPage.getLabelsCount();
     
     await labelsPage.deleteLabel(0);
@@ -92,7 +103,9 @@ test.describe('Labels Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  test('should select all labels', async () => {
+  test('should select all labels', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     const initialCount = await labelsPage.getLabelsCount();
     
     await labelsPage.selectAllLabels();
@@ -101,7 +114,9 @@ test.describe('Labels Management', () => {
     expect(selectedCount).toBe(initialCount);
   });
 
-  test('should bulk delete all labels', async () => {
+  test('should bulk delete all labels', async ({ page }) => {
+    await expect(page).toHaveURL(/labels/);
+    
     const initialCount = await labelsPage.getLabelsCount();
     if (initialCount === 0) return;
     

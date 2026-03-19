@@ -15,8 +15,9 @@ test.describe('Tasks Management', () => {
     await tasksPage.openTasksPage();
   });
 
-  
   test('should display kanban board correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     await expect(page.getByRole('heading', { name: 'Draft' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'To Review' })).toBeVisible();
     
@@ -25,6 +26,8 @@ test.describe('Tasks Management', () => {
   });
 
   test('should display task columns correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     await expect(page.getByRole('heading', { name: 'Draft' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'To Review' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'To Be Fixed' })).toBeVisible();
@@ -32,8 +35,9 @@ test.describe('Tasks Management', () => {
     await expect(page.getByRole('heading', { name: 'Published' })).toBeVisible();
   });
 
-  
-  test('should display create task form correctly', async () => {
+  test('should display create task form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     await tasksPage.clickCreate();
     
     await expect(tasksPage.titleInput).toBeVisible();
@@ -42,7 +46,9 @@ test.describe('Tasks Management', () => {
     await expect(tasksPage.saveButton).toBeVisible();
   });
 
-  test('should create a new task successfully', async () => {
+  test('should create a new task successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     const testData = {
       title: `Task ${Date.now()}`,
       content: 'Test task',
@@ -58,8 +64,9 @@ test.describe('Tasks Management', () => {
     await expect(page.locator(`text=${testData.title}`)).toBeVisible();
   });
 
-  
-  test('should display edit form correctly', async () => {
+  test('should display edit form correctly', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     const count = await tasksPage.getTasksCount();
     if (count === 0) {
       await tasksPage.clickCreate();
@@ -80,7 +87,9 @@ test.describe('Tasks Management', () => {
     await expect(tasksPage.saveButton).toBeVisible();
   });
 
-  test('should edit task data successfully', async () => {
+  test('should edit task data successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     const newTitle = `Edited ${Date.now()}`;
     
     await tasksPage.editTask(0);
@@ -92,8 +101,9 @@ test.describe('Tasks Management', () => {
     await expect(page.locator(`text=${newTitle}`)).toBeVisible();
   });
 
-  
-  test('should filter tasks by status', async () => {
+  test('should filter tasks by status', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     await tasksPage.clickCreate();
     await tasksPage.fillTaskForm({
       title: `Filter Task ${Date.now()}`,
@@ -111,14 +121,17 @@ test.describe('Tasks Management', () => {
     await tasksPage.clearFilters();
   });
 
-  
-  test('should filter tasks by assignee', async () => {
+  test('should filter tasks by assignee', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     await tasksPage.filterByAssignee('emily@example.com');
     await expect(page.getByRole('heading', { name: 'Draft' })).toBeVisible();
     await tasksPage.clearFilters();
   });
   
-  test('should delete a single task', async () => {
+  test('should delete a single task', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     const initialCount = await tasksPage.getTasksCount();
     if (initialCount === 0) return;
     
@@ -128,11 +141,11 @@ test.describe('Tasks Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  
-  test('should move card using dragTo locator', async () => {
+  test('should move card using dragTo locator', async ({ page }) => {
+    await expect(page).toHaveURL(/tasks/);
+    
     const taskTitle = `DragTest ${Date.now()}`;
     
-
     await tasksPage.clickCreate();
     await tasksPage.fillTaskForm({
       title: taskTitle,
@@ -148,7 +161,6 @@ test.describe('Tasks Management', () => {
     
     const cardTitleElement = page.locator(`text="${taskTitle}"`).first();
     await cardTitleElement.waitFor({ state: 'visible', timeout: 10000 });
-    
     
     const cardElement = cardTitleElement.locator('xpath=../../../../..');
     
