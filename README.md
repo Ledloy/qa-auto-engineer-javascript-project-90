@@ -36,11 +36,19 @@
 Node.js 20.x или выше
 npm 10.x или выше
 
+### Playwright
+
+Файл конфигурации `playwright.config.js` использует расширение `.js`, так как проект написан на JavaScript. 
+
+**Примечание:** Если проект использует TypeScript, файл должен называться `playwright.config.ts`.
+
 ## Клонировать проект
-git clone <URL-вашего-репозитория>
-
-cd <имя-проекта>
-
+```bash
+git clone https://github.com/Ledloy/qa-auto-engineer-javascript-project-90.git
+```
+```bash
+cd qa-auto-engineer-javascript-project-90
+```
 ## Установить зависимости
 
 ```bash
