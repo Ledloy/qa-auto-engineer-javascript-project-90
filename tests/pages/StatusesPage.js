@@ -1,8 +1,9 @@
+import { expect } from '@playwright/test';
+
 export class StatusesPage {
   constructor(page) {
     this.page = page;
     
-  
     this.statusesMenuLink = page.getByRole('menuitem', { name: 'Task statuses' });
 
     this.createButton = page.getByRole('link', { name: 'Create' });
@@ -15,7 +16,6 @@ export class StatusesPage {
     this.nameInput = page.getByRole('textbox', { name: 'Name' });
     this.slugInput = page.getByRole('textbox', { name: 'Slug' });
     
-
     this.successMessage = page.getByText('Element created').or(page.getByText('Element updated'));
     this.deleteMessage = page.getByText('Element deleted');
     this.errorMessage = page.getByText('Required').or(page.locator('[class*="error"]'));
@@ -30,7 +30,7 @@ export class StatusesPage {
   async openStatusesPage() {
     await this.statusesMenuLink.click();
     await this.statusesMenuLink.waitFor({ state: 'visible', timeout: 10000 });
-    await this.page.waitForTimeout(500);
+    await this.statusesTable.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   async clickCreate() {
@@ -78,7 +78,7 @@ export class StatusesPage {
 
   async selectAllStatuses() {
     await this.selectAllCheckbox.click();
-    await this.page.waitForTimeout(300);
+    await expect(this.selectAllCheckbox).toBeChecked({ timeout: 5000 });
   }
 
   async getStatusesCount() {

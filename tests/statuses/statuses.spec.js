@@ -80,6 +80,20 @@ test.describe('Statuses Management', () => {
   });
 
   test('should edit status data successfully', async ({ page }) => {
+    await expect(page).toHaveURL(/task_statuses/);
+    
+    const count = await statusesPage.getStatusesCount();
+    if (count === 0) {
+      await statusesPage.clickCreate();
+      await statusesPage.fillStatusForm({
+        name: 'Test Status',
+        slug: 'test_status'
+      });
+      await statusesPage.save();
+      await statusesPage.waitForSuccessMessage();
+      await statusesPage.openStatusesPage();
+    }
+    
     const newName = `Edited Status ${Date.now()}`;
     
     await statusesPage.editStatus(0);
@@ -133,7 +147,10 @@ test.describe('Statuses Management', () => {
       void error;
     }
     
-    await page.waitForTimeout(500);
+    await Promise.race([
+      page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
+      page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 5000 })
+    ]);
     
     const finalCount = await statusesPage.getStatusesCount();
     expect(finalCount).toBeLessThan(initialCount);

@@ -90,6 +90,20 @@ test.describe('Tasks Management', () => {
   test('should edit task data successfully', async ({ page }) => {
     await expect(page).toHaveURL(/tasks/);
     
+    const count = await tasksPage.getTasksCount();
+    if (count === 0) {
+      await tasksPage.clickCreate();
+      await tasksPage.fillTaskForm({
+        title: 'Test Task',
+        content: 'For editing',
+        assignee: 'emily@example.com',
+        status: 'Draft'
+      });
+      await tasksPage.save();
+      await tasksPage.waitForSuccessMessage();
+      await tasksPage.openTasksPage();
+    }
+    
     const newTitle = `Edited ${Date.now()}`;
     
     await tasksPage.editTask(0);
@@ -141,7 +155,7 @@ test.describe('Tasks Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-  test('should move card using dragTo locator', async ({ page }) => {
+test('should move card using dragTo locator', async ({ page }) => {
     await expect(page).toHaveURL(/tasks/);
     
     const taskTitle = `DragTest ${Date.now()}`;

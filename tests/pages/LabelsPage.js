@@ -1,11 +1,11 @@
+import { expect } from '@playwright/test';
+
 export class LabelsPage {
   constructor(page) {
     this.page = page;
     
- 
     this.labelsMenuLink = page.getByRole('menuitem', { name: 'Labels' });
     
- 
     this.createButton = page.getByRole('link', { name: 'Create' });
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.deleteButton = page.getByRole('button', { name: 'Delete' });
@@ -29,7 +29,7 @@ export class LabelsPage {
   async openLabelsPage() {
     await this.labelsMenuLink.click();
     await this.labelsMenuLink.waitFor({ state: 'visible', timeout: 10000 });
-    await this.page.waitForTimeout(500);
+    await this.labelsTable.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   async clickCreate() {
@@ -76,7 +76,7 @@ export class LabelsPage {
 
   async selectAllLabels() {
     await this.selectAllCheckbox.click();
-    await this.page.waitForTimeout(300);
+    await expect(this.selectAllCheckbox).toBeChecked({ timeout: 5000 });
   }
 
   async getLabelsCount() {

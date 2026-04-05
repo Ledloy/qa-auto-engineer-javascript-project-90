@@ -1,21 +1,19 @@
+import { expect } from '@playwright/test';
+
 export class UsersPage {
   constructor(page) {
     this.page = page;
     
-
     this.usersMenuLink = page.getByRole('menuitem', { name: 'Users' });
     
-
     this.createButton = page.getByRole('link', { name: 'Create' });
     this.saveButton = page.getByRole('button', { name: 'Save' });
 
     this.deleteButton = page.getByRole('button', { name: 'Delete' });
     
-
     this.userTable = page.getByRole('table');
     this.userRows = page.locator('tbody tr');
     
-
     this.firstNameInput = page.getByRole('textbox', { name: 'First name' });
     this.lastNameInput = page.getByRole('textbox', { name: 'Last name' });
     this.emailInput = page.getByRole('textbox', { name: 'Email' });
@@ -24,7 +22,6 @@ export class UsersPage {
     this.deleteMessage = page.getByText('Element deleted');
     this.errorMessage = page.getByText('Incorrect email format').or(page.getByText('Required'));
     
-  
     this.selectAllCheckbox = page.getByRole('checkbox', { name: 'Select all' });
   }
 
@@ -34,9 +31,8 @@ export class UsersPage {
 
   async openUsersPage() {
     await this.usersMenuLink.click();
-
     await this.usersMenuLink.waitFor({ state: 'visible', timeout: 10000 });
-    await this.page.waitForTimeout(500);
+    await this.userTable.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   async clickCreate() {
@@ -67,7 +63,6 @@ export class UsersPage {
     await this.emailInput.waitFor({ state: 'visible', timeout: 10000 });
   }
 
-
   async deleteUser(rowIndex = 0) {
     const row = this.userRows.nth(rowIndex);
     
@@ -86,7 +81,7 @@ export class UsersPage {
 
   async selectAllUsers() {
     await this.selectAllCheckbox.click();
-    await this.page.waitForTimeout(300);
+    await expect(this.selectAllCheckbox).toBeChecked({ timeout: 5000 });
   }
 
   async getUserCount() {

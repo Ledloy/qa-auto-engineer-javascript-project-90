@@ -86,6 +86,19 @@ test.describe('Users Management', () => {
   test('should edit user data successfully', async ({ page }) => {
     await expect(page).toHaveURL(/users/);
     
+    const count = await usersPage.getUserCount();
+    if (count === 0) {
+      await usersPage.clickCreate();
+      await usersPage.fillUserForm({
+        firstName: 'Test',
+        lastName: 'User',
+        email: `test${Date.now()}@google.com`
+      });
+      await usersPage.save();
+      await usersPage.waitForSuccessMessage();
+      await usersPage.openUsersPage();
+    }
+    
     const newEmail = `edited${Date.now()}@google.com`;
     
     await usersPage.editUser(0);
@@ -152,7 +165,11 @@ test.describe('Users Management', () => {
       void error;
     }
     
-    await page.waitForTimeout(500);
+    await Promise.race([
+      page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
+      page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 5000 })
+    ]);
+    
     const finalCount = await usersPage.getUserCount();
     expect(finalCount).toBeLessThan(initialCount);
   });

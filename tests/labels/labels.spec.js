@@ -78,6 +78,17 @@ test.describe('Labels Management', () => {
   test('should edit label data successfully', async ({ page }) => {
     await expect(page).toHaveURL(/labels/);
     
+    const count = await labelsPage.getLabelsCount();
+    if (count === 0) {
+      await labelsPage.clickCreate();
+      await labelsPage.fillLabelForm({
+        name: 'Test Label',
+      });
+      await labelsPage.save();
+      await labelsPage.waitForSuccessMessage();
+      await labelsPage.openLabelsPage();
+    }
+    
     const newName = `Edited Label ${Date.now()}`;
     
     await labelsPage.editLabel(0);
@@ -132,7 +143,11 @@ test.describe('Labels Management', () => {
       void error;
     }
 
-    await page.waitForTimeout(500);
+    await Promise.race([
+      page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
+      page.getByText('No Labels yet').waitFor({ state: 'visible', timeout: 5000 })
+    ]);
+    
     const finalCount = await labelsPage.getLabelsCount();
     expect(finalCount).toBeLessThan(initialCount);
   });

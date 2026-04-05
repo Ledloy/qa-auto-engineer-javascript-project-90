@@ -30,3 +30,11 @@ dist-ssr
 /playwright/.cache/
 /playwright/.auth/
 *.backup
+
+# === Скриншоты ===
+*.png
+*.jpg
+*.jpeg
+*.gif
+screenshots/
+debug-screenshots/
