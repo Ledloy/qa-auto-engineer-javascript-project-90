@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { StatusesPage } from '../pages/StatusesPage.js';
-import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Statuses Management', () => {
