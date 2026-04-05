@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { UsersPage } from '../pages/UsersPage.js';
+import { Config } from '../helpers/config.js';
+import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Users Management', () => {
   let loginPage, usersPage;
@@ -17,12 +19,9 @@ test.describe('Users Management', () => {
     
     const count = await usersPage.getUserCount();
     if (count === 0) {
+      const setupUser = TestDataFactory.createUser();
       await usersPage.clickCreate();
-      await usersPage.fillUserForm({
-        firstName: 'Test',
-        lastName: 'User',
-        email: `test${Date.now()}@google.com`
-      });
+      await usersPage.fillUserForm(setupUser);
       await usersPage.save();
       await usersPage.waitForSuccessMessage();
       await usersPage.openUsersPage();
@@ -43,11 +42,7 @@ test.describe('Users Management', () => {
   test('should create a new user successfully', async ({ page }) => {
     await expect(page).toHaveURL(/users/);
     
-    const testData = {
-      firstName: 'Test',
-      lastName: 'User',
-      email: `testuser${Date.now()}@google.com`
-    };
+    const testData = TestDataFactory.createUser();
     
     await usersPage.clickCreate();
     await usersPage.fillUserForm(testData);
@@ -88,12 +83,9 @@ test.describe('Users Management', () => {
     
     const count = await usersPage.getUserCount();
     if (count === 0) {
+      const userForEdit = TestDataFactory.createUser();
       await usersPage.clickCreate();
-      await usersPage.fillUserForm({
-        firstName: 'Test',
-        lastName: 'User',
-        email: `test${Date.now()}@google.com`
-      });
+      await usersPage.fillUserForm(userForEdit);
       await usersPage.save();
       await usersPage.waitForSuccessMessage();
       await usersPage.openUsersPage();
@@ -107,7 +99,7 @@ test.describe('Users Management', () => {
     await usersPage.emailInput.fill(newEmail);
     await usersPage.save();
     
-    await page.getByText('Element updated').waitFor({ state: 'visible', timeout: 10000 });
+    await page.getByText(Config.messages.updated).waitFor({ state: 'visible', timeout: 10000 });
     await expect(page.locator(`text=${newEmail}`)).toBeVisible();
   });
 
@@ -156,14 +148,12 @@ test.describe('Users Management', () => {
     await usersPage.selectAllUsers();
     await usersPage.delete();
     
-    try {
-      await page.getByText(/deleted|No Users yet/i)
-        .or(page.getByRole('alert'))
-        .first()
-        .waitFor({ state: 'visible', timeout: 3000 });
-    } catch (error) {
-      void error;
-    }
+    await Promise.race([
+      page.getByText('Element deleted').waitFor({ state: 'visible', timeout: 3000 }),
+      page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 3000 })
+    ]).catch(error => {
+      console.warn('Neither deletion message nor empty state appeared:', error.message);
+    });
     
     await Promise.race([
       page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),

@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { LabelsPage } from '../pages/LabelsPage.js';
+import { Config } from '../helpers/config.js';
+import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Labels Management', () => {
   let loginPage, labelsPage;
@@ -17,10 +19,9 @@ test.describe('Labels Management', () => {
   
     const count = await labelsPage.getLabelsCount();
     if (count === 0) {
+      const setupLabel = TestDataFactory.createLabel();
       await labelsPage.clickCreate();
-      await labelsPage.fillLabelForm({
-        name: `Test Label ${Date.now()}`
-      });
+      await labelsPage.fillLabelForm(setupLabel);
       await labelsPage.save();
       await labelsPage.waitForSuccessMessage();
       await labelsPage.openLabelsPage();
@@ -39,9 +40,7 @@ test.describe('Labels Management', () => {
   test('should create a new label successfully', async ({ page }) => {
     await expect(page).toHaveURL(/labels/);
     
-    const testData = {
-      name: `Label ${Date.now()}`
-    };
+    const testData = TestDataFactory.createLabel();
     
     await labelsPage.clickCreate();
     await labelsPage.fillLabelForm(testData);
@@ -80,10 +79,9 @@ test.describe('Labels Management', () => {
     
     const count = await labelsPage.getLabelsCount();
     if (count === 0) {
+      const editSetupLabel = TestDataFactory.createLabel({ name: 'Test Label' });
       await labelsPage.clickCreate();
-      await labelsPage.fillLabelForm({
-        name: 'Test Label',
-      });
+      await labelsPage.fillLabelForm(editSetupLabel);
       await labelsPage.save();
       await labelsPage.waitForSuccessMessage();
       await labelsPage.openLabelsPage();
@@ -97,7 +95,7 @@ test.describe('Labels Management', () => {
     await labelsPage.nameInput.fill(newName);
     await labelsPage.save();
     
-    await page.getByText('Element updated').waitFor({ state: 'visible', timeout: 10000 });
+    await page.getByText(Config.messages.updated).waitFor({ state: 'visible', timeout: 10000 });
     await expect(page.locator(`text=${newName}`)).toBeVisible();
   });
 
@@ -126,29 +124,16 @@ test.describe('Labels Management', () => {
   });
 
   test('should bulk delete all labels', async ({ page }) => {
-    await expect(page).toHaveURL(/labels/);
-    
-    const initialCount = await labelsPage.getLabelsCount();
-    if (initialCount === 0) return;
-    
-    await labelsPage.selectAllLabels();
-    await labelsPage.delete();
-    
-    try {
-      await page.getByText(/deleted|No.*yet/i)
-        .or(page.getByRole('alert'))
-        .first()
-        .waitFor({ state: 'visible', timeout: 3000 });
-    } catch (error) {
-      void error;
-    }
-
-    await Promise.race([
-      page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
-      page.getByText('No Labels yet').waitFor({ state: 'visible', timeout: 5000 })
-    ]);
-    
-    const finalCount = await labelsPage.getLabelsCount();
-    expect(finalCount).toBeLessThan(initialCount);
-  });
+  await expect(page).toHaveURL(/labels/);
+  
+  const initialCount = await labelsPage.getLabelsCount();
+  if (initialCount === 0) return;
+  
+  await labelsPage.selectAllLabels();
+  await labelsPage.delete();
+  await page.waitForTimeout(1000);
+  
+  const finalCount = await labelsPage.getLabelsCount();
+  expect(finalCount).toBeLessThan(initialCount);
+});
 });

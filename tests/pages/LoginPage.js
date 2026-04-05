@@ -1,3 +1,5 @@
+import { Config } from '../helpers/config.js';
+
 export class LoginPage {
   constructor(page) {
     this.page = page;
@@ -21,7 +23,7 @@ export class LoginPage {
   }
 
   async loginAsDefault() {
-    await this.login('admin', 'admin');
+    await this.login(Config.users.default.username, Config.users.default.password);
   }
 
   async isVisible() {

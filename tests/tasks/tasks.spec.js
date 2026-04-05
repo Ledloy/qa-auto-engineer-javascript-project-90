@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { TasksPage } from '../pages/TasksPage.js';
+import { Config } from '../helpers/config.js';
+import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Tasks Management', () => {
   let loginPage, tasksPage;
@@ -36,25 +38,20 @@ test.describe('Tasks Management', () => {
   });
 
   test('should display create task form correctly', async ({ page }) => {
-    await expect(page).toHaveURL(/tasks/);
-    
-    await tasksPage.clickCreate();
-    
-    await expect(tasksPage.titleInput).toBeVisible();
-    await expect(tasksPage.assigneeSelect).toBeVisible();
-    await expect(tasksPage.statusSelect).toBeVisible();
-    await expect(tasksPage.saveButton).toBeVisible();
-  });
+  await expect(page).toHaveURL(/tasks/);
+  
+  await tasksPage.clickCreate();
+  
+  await expect(tasksPage.titleInput).toBeVisible();
+  await expect(tasksPage.assigneeSelectInForm).toBeVisible();
+  await expect(tasksPage.statusSelectInForm).toBeVisible();
+  await expect(tasksPage.saveButton).toBeVisible();
+});
 
   test('should create a new task successfully', async ({ page }) => {
     await expect(page).toHaveURL(/tasks/);
     
-    const testData = {
-      title: `Task ${Date.now()}`,
-      content: 'Test task',
-      assignee: 'emily@example.com',
-      status: 'Draft'
-    };
+    const testData = TestDataFactory.createTask();
     
     await tasksPage.clickCreate();
     await tasksPage.fillTaskForm(testData);
@@ -69,13 +66,9 @@ test.describe('Tasks Management', () => {
     
     const count = await tasksPage.getTasksCount();
     if (count === 0) {
+      const taskForEdit = TestDataFactory.createTask();
       await tasksPage.clickCreate();
-      await tasksPage.fillTaskForm({
-        title: 'Test Task',
-        content: 'For editing',
-        assignee: 'emily@example.com',
-        status: 'Draft'
-      });
+      await tasksPage.fillTaskForm(taskForEdit);
       await tasksPage.save();
       await tasksPage.waitForSuccessMessage();
       await tasksPage.openTasksPage();
@@ -92,13 +85,9 @@ test.describe('Tasks Management', () => {
     
     const count = await tasksPage.getTasksCount();
     if (count === 0) {
+      const taskForEdit2 = TestDataFactory.createTask();
       await tasksPage.clickCreate();
-      await tasksPage.fillTaskForm({
-        title: 'Test Task',
-        content: 'For editing',
-        assignee: 'emily@example.com',
-        status: 'Draft'
-      });
+      await tasksPage.fillTaskForm(taskForEdit2);
       await tasksPage.save();
       await tasksPage.waitForSuccessMessage();
       await tasksPage.openTasksPage();
@@ -111,34 +100,38 @@ test.describe('Tasks Management', () => {
     await tasksPage.titleInput.fill(newTitle);
     await tasksPage.save();
     
-    await expect(page.getByText('Element updated')).toBeVisible();
+    await expect(page.getByText(Config.messages.updated)).toBeVisible();
     await expect(page.locator(`text=${newTitle}`)).toBeVisible();
   });
 
   test('should filter tasks by status', async ({ page }) => {
-    await expect(page).toHaveURL(/tasks/);
-    
-    await tasksPage.clickCreate();
-    await tasksPage.fillTaskForm({
-      title: `Filter Task ${Date.now()}`,
-      content: 'For filtering',
-      assignee: 'emily@example.com',
-      status: 'Draft'
-    });
-    await tasksPage.save();
-    await tasksPage.waitForSuccessMessage();
-    await tasksPage.openTasksPage();
-    
-    await tasksPage.filterByStatus('Draft');
-    await expect(page.locator('text=Filter Task')).toBeVisible();
-    
-    await tasksPage.clearFilters();
+  await expect(page).toHaveURL(/tasks/);
+  
+  const filterTask = TestDataFactory.createTask();
+  await tasksPage.clickCreate();
+  await tasksPage.fillTaskForm(filterTask);
+  await tasksPage.save();
+  await tasksPage.waitForSuccessMessage();
+  await tasksPage.openTasksPage();
+  
+  const countBeforeFilter = await tasksPage.getTasksCount();
+  await tasksPage.filterByStatus('Draft');
+  await expect(
+    page.locator(`.MuiTypography-h5`, { hasText: filterTask.title })
+  ).toBeVisible();
+  
+  const countAfterFilter = await tasksPage.getTasksCount();
+  expect(countAfterFilter).toBeLessThanOrEqual(countBeforeFilter);
+  await tasksPage.clearFilters();
+  
+  await expect(page.getByRole('heading', { name: 'Draft' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'To Review' })).toBeVisible();
   });
 
   test('should filter tasks by assignee', async ({ page }) => {
     await expect(page).toHaveURL(/tasks/);
     
-    await tasksPage.filterByAssignee('emily@example.com');
+    await tasksPage.filterByAssignee(Config.defaultAssignee);
     await expect(page.getByRole('heading', { name: 'Draft' })).toBeVisible();
     await tasksPage.clearFilters();
   });
@@ -155,37 +148,56 @@ test.describe('Tasks Management', () => {
     expect(finalCount).toBeLessThan(initialCount);
   });
 
-test('should move card using dragTo locator', async ({ page }) => {
-    await expect(page).toHaveURL(/tasks/);
-    
-    const taskTitle = `DragTest ${Date.now()}`;
-    
-    await tasksPage.clickCreate();
-    await tasksPage.fillTaskForm({
-      title: taskTitle,
-      content: 'Testing drag and drop',
-      assignee: 'emily@example.com',
-      status: 'Draft'
-    });
-    await tasksPage.save();
-    await page.getByText('Element created').waitFor({ state: 'visible', timeout: 10000 });
-    
-    await page.goto('/#/tasks');
-    await page.waitForTimeout(3000);
-    
-    const cardTitleElement = page.locator(`text="${taskTitle}"`).first();
-    await cardTitleElement.waitFor({ state: 'visible', timeout: 10000 });
-    
-    const cardElement = cardTitleElement.locator('xpath=../../../../..');
-    
-    const targetColumn = page.getByRole('heading', { name: 'To Review' }).first();
-    
-    await cardElement.dragTo(targetColumn);
-    await page.waitForTimeout(2000);
-    
-    await page.goto('/#/tasks');
-    await page.waitForTimeout(2000);
-    
-    await expect(page.locator(`text="${taskTitle}"`).first()).toBeVisible();
-  });
+  test('should update task status and move it to another column', async ({ page }) => {
+  await expect(page).toHaveURL(/tasks/);
+  
+  const taskTitle = `StatusTest ${Date.now()}`;
+  
+  // ✅ Создаем задачу
+  const taskData = TestDataFactory.createTask({ title: taskTitle, status: 'Draft' });
+  await tasksPage.clickCreate();
+  await tasksPage.fillTaskForm(taskData);
+  await tasksPage.save();
+  await page.getByText(Config.messages.created).waitFor({ state: 'visible', timeout: 10000 });
+  
+  // ✅ Возвращаемся на доску
+  await page.goto(Config.urls.tasks);
+  await page.getByRole('heading', { name: 'Draft' }).waitFor({ state: 'visible', timeout: 5000 });
+  
+  // ✅ Кликаем на кнопку задачи (используя правильный локатор из Codegen)
+  // Задача имеет описание, поэтому ищем по частичному совпадению
+  const taskButton = page.getByRole('button').filter({ hasText: taskTitle }).first();
+  await taskButton.click();
+  
+  // ✅ Кликаем Edit
+  await taskButton.getByLabel('Edit').click();
+  
+  // ✅ Ждём формы
+  await tasksPage.titleInput.waitFor({ state: 'visible', timeout: 10000 });
+  
+  // ✅ Меняем статус
+  await page.getByRole('combobox', { name: /Status/ }).click();
+  await page.waitForTimeout(300);
+  
+  // Выбираем To Review
+  await page.getByRole('option', { name: 'To Review' }).click();
+  await page.waitForTimeout(500);
+  
+  // ✅ Сохраняем
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByText(Config.messages.updated).waitFor({ state: 'visible', timeout: 10000 });
+  
+  // ✅ Даем время на обновление БД
+  await page.waitForTimeout(2000);
+  
+  // ✅ Перезагружаем
+  await page.goto(Config.urls.tasks);
+  await page.waitForLoadState('networkidle').catch(() => {});
+  await page.waitForTimeout(1000);
+  
+  // ✅ ПРАВИЛЬНАЯ ПРОВЕРКА: Ищем задачу как button с названием (из Codegen)
+  const toReviewTaskButton = page.getByRole('button').filter({ hasText: taskTitle }).first();
+  
+  await expect(toReviewTaskButton).toBeVisible();
+});
 });

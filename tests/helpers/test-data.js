@@ -1,3 +1,5 @@
+import { Config } from './config.js';
+
 export class TestDataFactory {
   static generateUnique(prefix = 'Test') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -7,7 +9,7 @@ export class TestDataFactory {
     const defaults = {
       title: this.generateUnique('Task'),
       content: 'Auto-generated test task',
-      assignee: 'emily@example.com',
+      assignee: Config.defaultAssignee,
       status: 'Draft',
       label: null
     };
@@ -16,9 +18,24 @@ export class TestDataFactory {
   
   static createUser(overrides = {}) {
     const defaults = {
-      username: 'admin',
-      password: 'admin',
-      email: 'emily@example.com'
+      firstName: 'Test',
+      lastName: 'User',
+      email: `user_${this.generateUnique()}@example.com`
+    };
+    return { ...defaults, ...overrides };
+  }
+
+  static createStatus(overrides = {}) {
+    const defaults = {
+      name: this.generateUnique('Status'),
+      slug: `status_${Date.now()}`
+    };
+    return { ...defaults, ...overrides };
+  }
+
+  static createLabel(overrides = {}) {
+    const defaults = {
+      name: this.generateUnique('Label')
     };
     return { ...defaults, ...overrides };
   }

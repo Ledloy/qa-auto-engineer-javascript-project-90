@@ -5,15 +5,15 @@ export class TasksPage {
     this.createButton = page.getByRole('link', { name: 'Create' });
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.deleteButton = page.getByRole('button', { name: 'Delete' });
-    this.assigneeSelect = page.getByRole('combobox', { name: 'Assignee' });
+    this.assigneeSelectInForm = page.getByRole('combobox', { name: 'Assignee' });
+    this.statusSelectInForm = page.getByRole('combobox', { name: 'Status' });
+    this.assigneeFilterSelect = page.getByRole('combobox', { name: 'Assignee' }).first();
+    this.statusFilterSelect = page.getByRole('combobox', { name: 'Status' }).first();
     this.titleInput = page.getByRole('textbox', { name: 'Title' });
     this.contentInput = page.getByRole('textbox', { name: 'Content' });
-    this.statusSelect = page.getByRole('combobox', { name: 'Status' });
     this.labelSelect = page.getByRole('combobox', { name: 'Label' });
     this.kanbanColumns = page.getByRole('heading');
     this.taskCards = page.getByRole('link', { name: 'Edit' });
-    this.filterAssignee = page.getByRole('combobox', { name: 'Assignee' }).first();
-    this.filterStatus = page.getByRole('combobox', { name: 'Status' }).first();
     this.successMessage = page.getByText('Element created').or(page.getByText('Element updated'));
     this.deleteMessage = page.getByText('Element deleted');
     this.kanbanBoard = page.getByRole('heading', { name: 'Draft' }).first();
@@ -35,28 +35,28 @@ export class TasksPage {
   }
 
   async fillTaskForm({ title, content, assignee, status, label }) {
-    if (assignee) {
-      await this.assigneeSelect.click();
-      await this.page.getByRole('option', { name: assignee }).click();
-      await this.page.getByRole('combobox', { name: 'Assignee' }).waitFor({ state: 'visible', timeout: 5000 });
-    }
-    
-    if (title) await this.titleInput.fill(title);
-    
-    if (content) await this.contentInput.fill(content);
-    
-    if (status) {
-      await this.statusSelect.click();
-      await this.page.getByRole('option', { name: status }).click();
-      await this.page.getByRole('combobox', { name: 'Status' }).waitFor({ state: 'visible', timeout: 5000 });
-    }
-    
-    if (label) {
-      await this.labelSelect.click();
-      await this.page.getByRole('option', { name: label }).click();
-      await this.page.getByRole('combobox', { name: 'Label' }).waitFor({ state: 'visible', timeout: 5000 });
-    }
+  if (assignee) {
+    await this.assigneeSelectInForm.click();
+    await this.page.getByRole('option', { name: assignee }).click();
+    await this.page.getByRole('combobox', { name: 'Assignee' }).waitFor({ state: 'visible', timeout: 5000 });
   }
+  
+  if (title) await this.titleInput.fill(title);
+  
+  if (content) await this.contentInput.fill(content);
+  
+  if (status) {
+    await this.statusSelectInForm.click();
+    await this.page.getByRole('option', { name: status }).click();
+    await this.page.getByRole('combobox', { name: 'Status' }).waitFor({ state: 'visible', timeout: 5000 });
+  }
+  
+  if (label) {
+    await this.labelSelect.click();
+    await this.page.getByRole('option', { name: label }).click();
+    await this.page.getByRole('combobox', { name: 'Label' }).waitFor({ state: 'visible', timeout: 5000 });
+  }
+}
 
   async save() {
     await this.saveButton.click();
@@ -82,15 +82,12 @@ const page = this.page;
 const colCount = await columns.count();
 if (colCount < 2) throw new Error('Недостаточно колонок для перемещения');
 
-// Найти карточку глобально (последняя версия в DOM)
 const cardTitleLocator = page.locator(`.MuiTypography-h5`, { hasText: taskTitle }).first();
 await cardTitleLocator.waitFor({ state: 'visible', timeout: 10000 });
 
-// Найти и обновить локатор draggable по тому же заголовку (актуальный элемент)
 const cardDraggable = page.locator('[data-rfd-draggable-id]').filter({ has: cardTitleLocator }).first();
 await cardDraggable.scrollIntoViewIfNeeded();
 
-// Определить sourceIndex
 let sourceIndex = -1;
 for (let i = 0; i < colCount; i++) {
   if ((await columns.nth(i).locator(`.MuiTypography-h5`, { hasText: taskTitle }).count()) > 0) {
@@ -103,7 +100,6 @@ if (sourceIndex === -1) throw new Error('Исходная колонка не н
 const targetIndex = (sourceIndex + 1) % colCount;
 const targetColumn = columns.nth(targetIndex);
 
-// Найти контейнер колонки (верхний блок с h6)
 const columnContainer = targetColumn.locator('xpath=ancestor::div[contains(@class,"MuiBox-root")][1]');
 const headingLocator = columnContainer.locator('h6').first();
 const raw = (await headingLocator.textContent().catch(() => '')) || '';
@@ -111,13 +107,10 @@ const targetName = raw.trim() || `column-${targetIndex}`;
 
 await cardDraggable.waitFor({ state: 'visible', timeout: 10000 });
 await targetColumn.waitFor({ state: 'visible', timeout: 10000 });
-await page.waitForTimeout(150);
 
-// Попробовать dragTo: сначала простой вызов, если не сработает — с координатами центра
 try {
   await cardDraggable.dragTo(targetColumn);
 } catch (err) {
-  // fallback: вычислить центр и передать как объект координат
   try {
     const box = await targetColumn.boundingBox();
     if (box) {
@@ -128,7 +121,6 @@ try {
     }
   } catch (innerErr) {
     console.log('dragTo fallback failed:', innerErr);
-    // Попробовать mouse-based drag как запасной план
     try {
       const srcBox = await cardDraggable.boundingBox();
       const dstBox = await targetColumn.boundingBox();
@@ -147,18 +139,12 @@ try {
   }
 }
 
-// Подождать коротко, дать UI применить изменения/анимацию
-await page.waitForTimeout(400);
-
-// Журнал и проверка: сколько найдено глобально и в целевой колонке
 const globalCount = await page.locator('.MuiTypography-h5', { hasText: taskTitle }).count();
 const inTarget = await targetColumn.locator('.MuiTypography-h5', { hasText: taskTitle }).count();
 console.log('after drag - globalCount:', globalCount, 'inTarget:', inTarget, 'targetName:', targetName);
 
-// Ждать successMessage как индикатор завершения перемещения (если есть)
 await this.successMessage.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
 
-// Если не найдено в target, собрать debug и бросить ошибку
 if (inTarget === 0) {
   console.log('DEBUG: targetColumn.innerHTML:', await targetColumn.innerHTML().catch(() => 'failed to get innerHTML'));
   await page.screenshot({ path: `debug-drag-${Date.now()}.png` }).catch(() => {});
@@ -169,29 +155,23 @@ return targetName;
 }
 
   async filterByStatus(status) {
-    await this.filterStatus.click();
-    await this.page.getByRole('option', { name: status }).click();
-    await this.page.getByRole('combobox', { name: 'Status' }).waitFor({ state: 'visible', timeout: 5000 });
-  }
+  await this.statusFilterSelect.click();
+  await this.page.getByRole('option', { name: status }).click();
+  await this.page.getByRole('combobox', { name: 'Status' }).waitFor({ state: 'visible', timeout: 5000 });
+}
 
   async filterByAssignee(assignee) {
-    await this.filterAssignee.click();
-    await this.page.getByRole('option', { name: assignee }).click();
-    await this.page.getByRole('combobox', { name: 'Assignee' }).waitFor({ state: 'visible', timeout: 5000 });
-  }
-
-  async clearFilters() {
-    await this.page.reload();
-    await this.kanbanBoard.waitFor({ state: 'visible', timeout: 5000 });
-  }
-
+  await this.assigneeFilterSelect.click();
+  await this.page.getByRole('option', { name: assignee }).click();
+  await this.page.getByRole('combobox', { name: 'Assignee' }).waitFor({ state: 'visible', timeout: 5000 });
+}
   async getTasksCount() {
     const editLinks = this.page.getByRole('link', { name: 'Edit' });
     return await editLinks.count();
   }
 
   async isTaskInColumn(taskTitle, columnName) {
-  const columns = this.page.locator('div:has(> h6)'); // контейнеры с непосредственным h6
+  const columns = this.page.locator('div:has(> h6)');
   const count = await columns.count();
   for (let i = 0; i < count; i++) {
     const col = columns.nth(i);
@@ -212,4 +192,16 @@ return targetName;
   async waitForDeleteMessage() {
     await this.deleteMessage.first().waitFor({ state: 'visible', timeout: 10000 });
   }
+  async clearFilters() {
+  await this.assigneeFilterSelect.click();
+  await this.page.getByRole('option').first().click();
+  
+  await this.statusFilterSelect.click();
+  await this.page.getByRole('option').first().click();
+  
+  await this.labelSelect.click();
+  await this.page.getByRole('option').first().click();
+  
+  await this.page.waitForTimeout(500);
+ }
 }
