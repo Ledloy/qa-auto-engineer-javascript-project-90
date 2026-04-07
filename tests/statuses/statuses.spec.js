@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { StatusesPage } from '../pages/StatusesPage.js';
+import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Statuses Management', () => {
@@ -18,7 +19,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should display statuses page correctly', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     await expect(statusesPage.statusesTable).toBeVisible();
     
@@ -27,7 +28,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should display create status form correctly', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     await statusesPage.clickCreate();
     
@@ -52,7 +53,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should display status information correctly', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     await expect(page.locator('text=Name')).toBeVisible();
     await expect(page.locator('text=Slug')).toBeVisible();
@@ -60,7 +61,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should display edit form correctly', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     const count = await statusesPage.getStatusesCount();
     if (count === 0) {
@@ -79,7 +80,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should edit status data successfully', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     const count = await statusesPage.getStatusesCount();
     if (count === 0) {
@@ -104,7 +105,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should delete a single status', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount <= 1) return;
@@ -118,7 +119,7 @@ test.describe('Statuses Management', () => {
   });
 
   test('should select all statuses', async ({ page }) => {
-    await expect(page).toHaveURL(/task_statuses/);
+    await expect(page).toHaveURL(Config.urls.statuses);
     
     const initialCount = await statusesPage.getStatusesCount();
     if (initialCount === 0) return;
@@ -130,27 +131,27 @@ test.describe('Statuses Management', () => {
   });
 
   test('should bulk delete all statuses', async ({ page }) => {
-  await expect(page).toHaveURL(/task_statuses/);
-  
-  const initialCount = await statusesPage.getStatusesCount();
-  if (initialCount === 0) return;
-  
-  await statusesPage.selectAllStatuses();
-  await statusesPage.delete();
-  
-  await Promise.race([
-    page.getByText('Element deleted').waitFor({ state: 'visible', timeout: 3000 }),
-    page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 3000 })
-  ]).catch(error => {
-    console.warn('Neither deletion message nor empty state appeared:', error.message);
+    await expect(page).toHaveURL(Config.urls.statuses);
+    
+    const initialCount = await statusesPage.getStatusesCount();
+    if (initialCount === 0) return;
+    
+    await statusesPage.selectAllStatuses();
+    await statusesPage.delete();
+    
+    await Promise.race([
+      page.getByText(Config.messages.deleted).waitFor({ state: 'visible', timeout: 3000 }),
+      page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 3000 })
+    ]).catch(error => {
+      console.warn('Neither deletion message nor empty state appeared:', error.message);
+    });
+    
+    await Promise.race([
+      page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
+      page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 5000 })
+    ]);
+    
+    const finalCount = await statusesPage.getStatusesCount();
+    expect(finalCount).toBeLessThan(initialCount);
   });
-  
-  await Promise.race([
-    page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
-    page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 5000 })
-  ]);
-  
-  const finalCount = await statusesPage.getStatusesCount();
-  expect(finalCount).toBeLessThan(initialCount);
-});
 });
