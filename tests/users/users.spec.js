@@ -149,9 +149,7 @@ test.describe('Users Management', () => {
       page.getByRole('table').waitFor({ state: 'hidden', timeout: 10000 }),
       page.locator('tbody tr').first().waitFor({ state: 'hidden', timeout: 10000 }),
       page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 10000 })
-    ]).catch(() => {
-      console.log('Waiting for table update...');
-    });
+    ]);
     
     const finalCount = await usersPage.getUserCount();
     expect(finalCount).toBeLessThan(initialCount);

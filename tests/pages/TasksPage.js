@@ -143,7 +143,7 @@ export class TasksPage {
     const inTarget = await targetColumn.locator('.MuiTypography-h5', { hasText: taskTitle }).count();
     console.log('after drag - globalCount:', globalCount, 'inTarget:', inTarget, 'targetName:', targetName);
 
-    await this.successMessage.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await this.successMessage.first().waitFor({ state: 'visible', timeout: 5000 });
 
     if (inTarget === 0) {
       console.log('DEBUG: targetColumn.innerHTML:', await targetColumn.innerHTML().catch(() => 'failed to get innerHTML'));

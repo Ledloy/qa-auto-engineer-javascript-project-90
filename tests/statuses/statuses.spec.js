@@ -140,9 +140,7 @@ test.describe('Statuses Management', () => {
       page.getByRole('table').waitFor({ state: 'hidden', timeout: 10000 }),
       page.locator('tbody tr').first().waitFor({ state: 'hidden', timeout: 10000 }),
       page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 10000 })
-    ]).catch(() => {
-      console.log('Waiting for table update...');
-    });
+    ]);
     
     const finalCount = await statusesPage.getStatusesCount();
     expect(finalCount).toBeLessThan(initialCount);
