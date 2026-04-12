@@ -2,15 +2,16 @@ import { test, expect } from '@playwright/test';
 import { TasksPage } from '../pages/TasksPage.js';
 import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
+import { loginAsDefault } from '../helpers/auth.helper.js';
 
 test.describe('Tasks Management', () => {
   let tasksPage;
 
   test.beforeEach(async ({ page }) => {
     tasksPage = new TasksPage(page);
-    
-    await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 5000 });
-    
+
+    await loginAsDefault(page);
+ 
     await tasksPage.openTasksPage();
   });
 
@@ -113,7 +114,7 @@ test.describe('Tasks Management', () => {
     
     const countBeforeFilter = await tasksPage.getTasksCount();
     await tasksPage.filterByStatus('Draft');
-    
+  
     const isInDraft = await tasksPage.isTaskInColumn(filterTask.title, 'Draft');
     expect(isInDraft).toBe(true);
     
@@ -153,39 +154,44 @@ test.describe('Tasks Management', () => {
     await expect(page).toHaveURL(/tasks/);
     
     const taskTitle = `StatusTest ${Date.now()}`;
-    
+  
     const taskData = TestDataFactory.createTask({ title: taskTitle, status: 'Draft' });
     await tasksPage.clickCreate();
     await tasksPage.fillTaskForm(taskData);
     await tasksPage.save();
     await page.getByText(Config.messages.created).waitFor({ state: 'visible', timeout: 10000 });
+  
     await page.goto(Config.urls.tasks);
     await Promise.all([
       page.waitForLoadState('networkidle'),
       page.getByRole('heading', { name: 'Draft' }).waitFor({ state: 'visible', timeout: 10000 })
     ]);
-    
+  
     let isInDraft = await tasksPage.isTaskInColumn(taskTitle, 'Draft');
     expect(isInDraft).toBe(true);
-  
+ 
     const taskButton = page.getByRole('button').filter({ hasText: taskTitle }).first();
     await taskButton.click();
-    
+ 
     await taskButton.getByLabel('Edit').click();
     await tasksPage.titleInput.waitFor({ state: 'visible', timeout: 10000 });
+ 
     await page.getByRole('combobox', { name: /Status/ }).click();
+   
     await page.getByRole('option', { name: 'To Review' }).waitFor({ 
       state: 'visible', 
       timeout: 5000 
     });
-    
+  
     await page.getByRole('option', { name: 'To Review' }).click();
+ 
     await page.getByRole('combobox', { name: /Status/ }).waitFor({ 
       state: 'visible', 
       timeout: 5000 
     });
     
     await page.getByRole('button', { name: 'Save' }).click();
+   
     await page.getByText(Config.messages.updated).waitFor({ 
       state: 'visible', 
       timeout: 10000 
@@ -196,7 +202,7 @@ test.describe('Tasks Management', () => {
       page.waitForLoadState('networkidle'),
       page.getByRole('heading', { name: 'Draft' }).waitFor({ state: 'visible', timeout: 10000 })
     ]);
-    
+
     const isInToReview = await tasksPage.isTaskInColumn(taskTitle, 'To Review');
     expect(isInToReview).toBe(true);
     

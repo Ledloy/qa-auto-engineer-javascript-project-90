@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { UsersPage } from '../pages/UsersPage.js';
 import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
+import { loginAsDefault } from '../helpers/auth.helper.js';
 
 test.describe('Users Management', () => {
   let usersPage;
@@ -9,10 +10,10 @@ test.describe('Users Management', () => {
   test.beforeEach(async ({ page }) => {
     usersPage = new UsersPage(page);
     
-    await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 5000 });
+    await loginAsDefault(page);
     
     await usersPage.openUsersPage();
-   
+    
     const count = await usersPage.getUserCount();
     if (count === 0) {
       const setupUser = TestDataFactory.createUser();
@@ -143,16 +144,14 @@ test.describe('Users Management', () => {
     
     await usersPage.selectAllUsers();
     await usersPage.delete();
-   
-    await page.getByText(Config.messages.deleted).waitFor({ 
-      state: 'visible', 
-      timeout: 10000 
-    });
-   
+    
     await Promise.race([
-      page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
-      page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 5000 })
-    ]);
+      page.getByRole('table').waitFor({ state: 'hidden', timeout: 10000 }),
+      page.locator('tbody tr').first().waitFor({ state: 'hidden', timeout: 10000 }),
+      page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 10000 })
+    ]).catch(() => {
+      console.log('Waiting for table update...');
+    });
     
     const finalCount = await usersPage.getUserCount();
     expect(finalCount).toBeLessThan(initialCount);

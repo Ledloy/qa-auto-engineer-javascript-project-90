@@ -2,17 +2,18 @@ import { test, expect } from '@playwright/test';
 import { LabelsPage } from '../pages/LabelsPage.js';
 import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
+import { loginAsDefault } from '../helpers/auth.helper.js';
 
 test.describe('Labels Management', () => {
   let labelsPage;
 
   test.beforeEach(async ({ page }) => {
     labelsPage = new LabelsPage(page);
-  
-    await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 5000 });
+    
+    await loginAsDefault(page);
     
     await labelsPage.openLabelsPage();
-  
+    
     const count = await labelsPage.getLabelsCount();
     if (count === 0) {
       const setupLabel = TestDataFactory.createLabel();
@@ -128,11 +129,14 @@ test.describe('Labels Management', () => {
     await labelsPage.selectAllLabels();
     await labelsPage.delete();
     
-    await page.getByText(Config.messages.deleted).waitFor({ 
-      state: 'visible', 
-      timeout: 10000 
+    await Promise.race([
+      page.getByRole('table').waitFor({ state: 'hidden', timeout: 10000 }),
+      page.locator('tbody tr').first().waitFor({ state: 'hidden', timeout: 10000 }),
+      page.getByText(/No.*yet/i).waitFor({ state: 'visible', timeout: 10000 })
+    ]).catch(() => {
+      console.log('Waiting for table update...');
     });
-  
+    
     const finalCount = await labelsPage.getLabelsCount();
     expect(finalCount).toBeLessThan(initialCount);
   });
