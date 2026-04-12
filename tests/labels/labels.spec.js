@@ -1,20 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage.js';
 import { LabelsPage } from '../pages/LabelsPage.js';
 import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Labels Management', () => {
-  let loginPage, labelsPage;
+  let labelsPage;
 
   test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
     labelsPage = new LabelsPage(page);
-    
-    await loginPage.goto();
-    await loginPage.loginAsDefault();
-    await expect(loginPage.page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 10000 });
   
+    await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 5000 });
+    
     await labelsPage.openLabelsPage();
   
     const count = await labelsPage.getLabelsCount();
@@ -124,16 +120,20 @@ test.describe('Labels Management', () => {
   });
 
   test('should bulk delete all labels', async ({ page }) => {
-  await expect(page).toHaveURL(/labels/);
+    await expect(page).toHaveURL(/labels/);
+    
+    const initialCount = await labelsPage.getLabelsCount();
+    if (initialCount === 0) return;
+    
+    await labelsPage.selectAllLabels();
+    await labelsPage.delete();
+    
+    await page.getByText(Config.messages.deleted).waitFor({ 
+      state: 'visible', 
+      timeout: 10000 
+    });
   
-  const initialCount = await labelsPage.getLabelsCount();
-  if (initialCount === 0) return;
-  
-  await labelsPage.selectAllLabels();
-  await labelsPage.delete();
-  await page.waitForTimeout(1000);
-  
-  const finalCount = await labelsPage.getLabelsCount();
-  expect(finalCount).toBeLessThan(initialCount);
-});
+    const finalCount = await labelsPage.getLabelsCount();
+    expect(finalCount).toBeLessThan(initialCount);
+  });
 });

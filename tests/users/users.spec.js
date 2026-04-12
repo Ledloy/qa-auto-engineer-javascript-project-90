@@ -1,22 +1,18 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage.js';
 import { UsersPage } from '../pages/UsersPage.js';
 import { Config } from '../helpers/config.js';
 import { TestDataFactory } from '../helpers/test-data.js';
 
 test.describe('Users Management', () => {
-  let loginPage, usersPage;
+  let usersPage;
 
   test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
     usersPage = new UsersPage(page);
     
-    await loginPage.goto();
-    await loginPage.loginAsDefault();
-    await expect(loginPage.page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible({ timeout: 5000 });
     
     await usersPage.openUsersPage();
-    
+   
     const count = await usersPage.getUserCount();
     if (count === 0) {
       const setupUser = TestDataFactory.createUser();
@@ -147,14 +143,12 @@ test.describe('Users Management', () => {
     
     await usersPage.selectAllUsers();
     await usersPage.delete();
-    
-    await Promise.race([
-      page.getByText('Element deleted').waitFor({ state: 'visible', timeout: 3000 }),
-      page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 3000 })
-    ]).catch(error => {
-      console.warn('Neither deletion message nor empty state appeared:', error.message);
+   
+    await page.getByText(Config.messages.deleted).waitFor({ 
+      state: 'visible', 
+      timeout: 10000 
     });
-    
+   
     await Promise.race([
       page.getByRole('table').waitFor({ state: 'visible', timeout: 5000 }),
       page.getByText('No Users yet').waitFor({ state: 'visible', timeout: 5000 })
